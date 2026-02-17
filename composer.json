@@ -1,0 +1,26 @@
+{
+    "name": "sylapi/omnipay-tbibank",
+    "description": "TBIBank gateway for Omnipay payment processing library",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "league/omnipay": "^3",
+        "http-interop/http-factory-guzzle": "^1.2"
+    },
+    "autoload": {
+      "psr-4": {
+        "Omnipay\\TBIBank\\": "src"
+      }
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1"
+    }
+}

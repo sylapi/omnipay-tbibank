@@ -1,0 +1,7 @@
+/.idea/
+/vendor/
+/work/
+/.env
+composer.lock
+.phpunit.result.cache
+app.php
