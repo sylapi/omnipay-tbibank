@@ -10,12 +10,26 @@ class VoidResponse extends \Omnipay\Common\Message\AbstractResponse
 
     public function isSuccessful()
     {   
-        return $this->isSuccessfulResponse();
+        // TBI cancellation response: {"isSuccess": true, "error": null}
+        return isset($this->data['isSuccess']) && $this->data['isSuccess'] === true;
     }
 
-    public function getTransactionId()
+    public function getTransactionId(): ?string
     {
-        // TODO: Dostosuj do struktury odpowiedzi TBIBank API
-        return ($this->isSuccessful()) ? $this->data['transaction_id'] ?? $this->data['transactionId'] : null;
+        // Return the order ID that was canceled
+        $request = $this->getRequest();
+        if ($request instanceof \Omnipay\Common\Message\AbstractRequest) {
+            return $request->getTransactionReference();
+        }
+        return null;
+    }
+
+    public function getMessage()
+    {
+        if ($this->isSuccessful()) {
+            return 'Order canceled successfully';
+        }
+        
+        return $this->data['error'] ?? 'Cancellation failed';
     }
 }

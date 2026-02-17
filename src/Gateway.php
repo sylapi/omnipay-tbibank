@@ -23,9 +23,11 @@ class Gateway extends AbstractGateway
     public function getDefaultParameters()
     {
         return [
-            'apiKey'       => '',
-            'secretKey'    => '',
-            'testMode'     => true
+            'storeId'       => '',
+            'username'      => '',
+            'password'      => '',
+            'providerCode'  => '',
+            'testMode'      => true
         ];
     }
 

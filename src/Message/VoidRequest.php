@@ -10,17 +10,33 @@ class VoidRequest extends \Omnipay\Common\Message\AbstractRequest
 {
     use Trait\Request;
 
-    // TODO: Ustaw właściwą ścieżkę API dla TBIBank
-    const API_PATH = '/payments/void';
-    
+    const API_PATH = '/CanceledByCustomer';
+
     public function sendData($data)
     {
-        // TODO: Implementuj anulowanie płatności zgodnie z TBIBank API
         $apiUrl = $this->getApiUrl() . self::API_PATH;
         $headers = $this->getHeaders();
 
         try {
-            $body = Psr7\Utils::streamFor(json_encode($data));
+            // Prepare cancellation data
+            $cancelData = [
+                'orderId' => $this->getTransactionReference(),
+                'statusId' => '1', // 1 for cancellation
+                'username' => $this->getUsername(),
+                'password' => $this->getPassword()
+            ];
+
+            // Encrypt cancellation data
+            $encryptedData = $this->encryptOrderData($cancelData);
+
+            // Prepare form data
+            $postData = [
+                'orderData' => $encryptedData,
+                'encryptCode' => $this->getProviderCode()
+            ];
+
+            $body = http_build_query($postData);
+            
             $result = $this->httpClient->request(
                 'POST', 
                 $apiUrl, 
@@ -38,12 +54,9 @@ class VoidRequest extends \Omnipay\Common\Message\AbstractRequest
 
     public function getData()
     {
-        // TODO: Przygotuj dane zgodnie z dokumentacją TBIBank API
-        $data = [
-            'transaction_id' => $this->getTransactionReference(),
-            // TODO: Dodaj inne wymagane pola
-        ];
-
-        return $data;
+        // Validate required parameters for cancellation
+        $this->validate('transactionReference', 'username', 'password', 'providerCode');
+        
+        return [];
     }
 }

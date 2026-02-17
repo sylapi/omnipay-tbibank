@@ -9,19 +9,22 @@ class FetchTransactionResponse extends \Omnipay\Common\Message\AbstractResponse
     use Trait\Response;
 
     public function isSuccessful()
-    {   
-        return $this->isSuccessfulResponse();
+    {
+        return false;
     }
 
     public function getTransactionId()
     {
-        // TODO: Dostosuj do struktury odpowiedzi TBIBank API
-        return ($this->isSuccessful()) ? $this->data['transaction_id'] ?? null : null;
+        return $this->data['transaction_id'] ?? null;
     }
 
     public function getStatus()
     {
-        // TODO: Dostosuj do struktury odpowiedzi TBIBank API
         return $this->data['status'] ?? null;
+    }
+
+    public function getMessage()
+    {
+        return 'TBI does not provide transaction status API. Status updates come via callback only.';
     }
 }

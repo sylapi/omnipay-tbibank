@@ -1,6 +1,7 @@
 /.idea/
 /vendor/
 /work/
+/keys/
 /.env
 composer.lock
 .phpunit.result.cache

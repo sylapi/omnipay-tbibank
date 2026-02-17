@@ -9,16 +9,9 @@ trait Response {
 
     public function isSuccessfulResponse()
     {
-        // TODO: Implementuj logikę sprawdzania sukcesu zgodnie z TBIBank API
-        // Placeholder - należy dostosować do rzeczywistej struktury odpowiedzi TBIBank
-        $success = (isset($this->data['success']) && $this->data['success'] === true); 
-
-        if($success === false) {
-            $this->setMessage($this->data['error']['message'] ?? 'Something went wrong.');
-            $this->setCode($this->data['error']['code'] ?? null);
-        }
-
-        return $success;
+        // TBI specific success logic
+        // For most TBI responses, success is indicated by isSuccess: true
+        return isset($this->data['isSuccess']) && $this->data['isSuccess'] === true;
     }
     
     public function getMessage()
