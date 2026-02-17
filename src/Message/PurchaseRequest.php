@@ -57,7 +57,7 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
             // Handle successful redirect (301/302) as success
             if ($statusCode >= 300 && $statusCode < 400) {
                 $location = $result->getHeader('Location');
-                if ($location && count($location) > 0) {
+                if (isset($location[0]) && !empty($location[0])) {
                     $response = [
                         'isSuccess' => true,
                         'redirect_url' => $location[0],
