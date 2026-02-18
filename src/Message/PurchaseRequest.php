@@ -93,14 +93,14 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
             'lname' => $this->getParameter('customerLastName') ?? '',
             'cnp' => $this->getParameter('customerCnp') ?? '',
             'email' => $this->getParameter('customerEmail') ?? '',
-            'phone' => $this->getParameter('customerPhone') ?: '', // phone not customerPhone
+            'phone' => $this->getParameter('phone') ?: '',
             'billing_address' => $this->getParameter('billingAddress') ?: '',
             'billing_city' => $this->getParameter('billingCity') ?: '',
             'billing_county' => $this->getParameter('billingCounty') ?: '',
             'shipping_address' => $this->getParameter('shippingAddress') ?: '',
             'shipping_city' => $this->getParameter('shippingCity') ?: '',
             'shipping_county' => $this->getParameter('shippingCounty') ?: '',
-            'promo' => $this->calculatePromo($this->getAmount()) // promo inside customer object
+            'promo' => $this->getParameter('promo') ?? 0 // User can set promo code, default 0
         ];
     }
 
@@ -140,9 +140,14 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
         return $this->setParameter('customerEmail', $value);
     }
 
-    public function setCustomerPhone($value)
+    public function setPhone($value)
     {
-        return $this->setParameter('customerPhone', $value);
+        return $this->setParameter('phone', $value);
+    }
+
+    public function getPhone()
+    {
+        return $this->getParameter('phone');
     }
 
     public function setCustomerCnp($value)
@@ -188,5 +193,15 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
     public function setItems($items)
     {
         return $this->setParameter('items', $items);
+    }
+
+    public function setPromo($value)
+    {
+        return $this->setParameter('promo', $value);
+    }
+
+    public function getPromo()
+    {
+        return $this->getParameter('promo') ?? 0;
     }
 }

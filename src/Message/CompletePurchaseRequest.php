@@ -41,14 +41,14 @@ class CompletePurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
         throw new Exception('No callback data received from TBI');
     }
 
-    public function getPrivateKeyPath()
+    public function getPrivateKey()
     {
-        return $this->getParameter('privateKeyPath');
+        return $this->getParameter('privateKey');
     }
 
-    public function setPrivateKeyPath($value)
+    public function setPrivateKey($value)
     {
-        return $this->setParameter('privateKeyPath', $value);
+        return $this->setParameter('privateKey', $value);
     }
 
     public function getPrivateKeyPassword()
@@ -66,15 +66,15 @@ class CompletePurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
      */
     public function decryptCallbackData($encryptedData)
     {
-        $privateKeyPath = $this->getPrivateKeyPath();
+        $privateKeyContent = $this->getPrivateKey();
         $privateKeyPassword = $this->getPrivateKeyPassword();
         
-        if (!$privateKeyPath || !file_exists($privateKeyPath)) {
-            throw new Exception('Private key file not found. Please set privateKeyPath parameter.');
+        if (!$privateKeyContent) {
+            throw new Exception('Private key content not found. Please set privateKey parameter.');
         }
 
         $privateKey = openssl_pkey_get_private(
-            file_get_contents($privateKeyPath), 
+            $privateKeyContent, 
             $privateKeyPassword ?? ''
         );
         

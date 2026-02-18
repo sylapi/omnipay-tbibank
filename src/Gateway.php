@@ -7,8 +7,6 @@ use Omnipay\Common\AbstractGateway;
 use Omnipay\TBIBank\Message\VoidRequest;
 use Omnipay\TBIBank\Message\PurchaseRequest;
 use Omnipay\TBIBank\Message\CompletePurchaseRequest;
-use Omnipay\TBIBank\Message\FetchTransactionRequest;
-use Omnipay\TBIBank\Message\RefundRequest;
 
 class Gateway extends AbstractGateway
 {
@@ -45,16 +43,6 @@ class Gateway extends AbstractGateway
     public function completePurchase(array $options = array())
     {
         return parent::createRequest(CompletePurchaseRequest::class, $options);
-    }
-
-    public function fetchTransaction(array $options = [])
-    {
-        return parent::createRequest(FetchTransactionRequest::class, $options);
-    }
-
-    public function refund(array $options = array())
-    {
-        return parent::createRequest(RefundRequest::class, $options);
     }
 
     public function void(array $options = array())

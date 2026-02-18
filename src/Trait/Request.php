@@ -44,14 +44,24 @@ trait Request {
         return $this->setParameter('providerCode', $value);
     }
 
-    public function getPublicKeyPath()
+    public function getPublicKey()
     {
-        return $this->getParameter('publicKeyPath');
+        return $this->getParameter('publicKey');
     }
 
-    public function setPublicKeyPath($value)
+    public function setPublicKey($value)
     {
-        return $this->setParameter('publicKeyPath', $value);
+        return $this->setParameter('publicKey', $value);
+    }
+
+    public function getPrivateKey()
+    {
+        return $this->getParameter('privateKey');
+    }
+
+    public function setPrivateKey($value)
+    {
+        return $this->setParameter('privateKey', $value);
     }
 
     public function getApiUrl()
@@ -80,28 +90,10 @@ trait Request {
      */
     public function encryptOrderData($data)
     {
-        $publicKeyPath = $this->getPublicKeyPath();
+        $publicKeyContent = $this->getPublicKey();
         
-        // Try file-based key first, then fallback to TBI test key
-        $publicKeyContent = null;
-        $keySource = 'unknown';
-        if ($publicKeyPath && file_exists($publicKeyPath)) {
-            $publicKeyContent = file_get_contents($publicKeyPath);
-            $keySource = 'file: ' . $publicKeyPath;
-        } else {
-            // Fallback to TBI test public key from working example
-            $publicKeyContent = <<<EOD
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA41/0nOIwjmgor4E3cmuN
-fBqylJ781ceKkxUvukvP1uBWdDEV+U8ed2jVzhi/DSyGZZjxCrHT7YjueKOAXknD
-PD/Jw7WzIV8xX2k4OJrqqREmbiUE0cjlPH1pfrAUgi6DcLASoJD6gcdqcyV/cYlM
-qfXnYIWQpIx2iTtPGpc4XEx5jqH6lePWkv7fCULx/1VeBKeERMjZSvLamm5g7S+h
-YsbhQ+kzKy6J6psxzj3u6Suwrnzs7Q8lB4tKAjMFSbWWbpf+EDh+LNiIC0L5br86
-Vt2XtiUnKjPx0CBqkZoL7MQ/8QK5iuPSh79hng093hcfhG65HaGwMbqYFeyME4/t
-ewIDAQAB
------END PUBLIC KEY-----
-EOD;
-            $keySource = 'embedded TBI test key';
+        if (!$publicKeyContent) {
+            throw new \Exception('Public key is required. Please use setPublicKey() to set the RSA public key content.');
         }
 
         $publicKey = openssl_pkey_get_public($publicKeyContent);
@@ -130,17 +122,5 @@ EOD;
 
         return base64_encode($output);
     }
-
-    /**
-     * Calculate promo code based on order total according to TBI logic
-     */
-    public function calculatePromo($orderTotal)
-    {
-        // TODO: Implement promo logic based on order amount
-        // According to documentation: "promo parameter is determined by the order total"
-        // You need to get the specific promo logic from TBI team
-        return 0;
-    }
-
     
 }

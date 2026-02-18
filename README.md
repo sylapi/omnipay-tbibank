@@ -99,8 +99,10 @@ $gateway->setPassword('your_password');
 $gateway->setProviderCode('your_store_id');
 $gateway->setTestMode(false);
 
-// Własny klucz publiczny do szyfrowania
-$gateway->setPublicKeyPath(__DIR__ . '/keys/public.pem');
+// Własny klucz publiczny do szyfrowania (bezpośrednia zawartość)
+$gateway->setPublicKey('-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+-----END PUBLIC KEY-----');
 ```
 
 ## 💳 Aplikacja kredytowa
@@ -118,7 +120,7 @@ $response = $gateway->purchase([
     'customerFirstName' => 'Catalin',
     'customerLastName' => 'Test',
     'customerEmail' => 'test@example.com',
-    'customerPhone' => '0700000000',
+    'phone' => '0700000000',
     'customerCnp' => '',  // CNP może być pusty w testach
     
     // Adres rozliczeniowy
@@ -162,7 +164,7 @@ if ($response->isSuccessful()) {
 | `customerFirstName` | string | Imię klienta |
 | `customerLastName` | string | Nazwisko klienta |
 | `customerEmail` | string | Email klienta |
-| `customerPhone` | string | Telefon klienta |
+| `phone` | string | Telefon klienta |
 | `notifyUrl` | string | URL callback'a |
 
 ### Opcjonalne parametry
@@ -183,8 +185,8 @@ Callback'i są wysyłane przez TBI po zakończeniu procesu aplikacji kredytowej.
 ```php
 // Endpoint callback'a: /tbi/callback
 $response = $gateway->completePurchase([
-    'privateKeyPath' => __DIR__ . '/keys/private.pem', // Opcjonalne
-    'privateKeyPassword' => '' // Hasło do klucza prywatnego
+    // TYLKO jeśli klucz prywatny ma hasło:
+    // 'privateKeyPassword' => 'haslo_do_klucza'
 ])->send();
 
 if ($response->isSuccessful()) {
@@ -234,8 +236,18 @@ $gateway->setTestMode(true); // Automatycznie użyje klucza testowego TBI
 ### Własny klucz produkcyjny
 
 ```php
-$gateway->setPublicKeyPath('/path/to/your/public.pem');
-$gateway->setPrivateKeyPath('/path/to/your/private.pem'); // Do callback'ów
+// Klucz publiczny (zawartość klucza bezpośrednio)
+$gateway->setPublicKey('-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
+-----END PUBLIC KEY-----');
+
+// Klucz prywatny do callback'ów (zawartość klucza bezpośrednio)
+$gateway->setPrivateKey('-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...
+-----END PRIVATE KEY-----');
+
+// TYLKO jeśli klucz prywatny MA HASŁO (rzadko potrzebne)
+// $gateway->setPrivateKeyPassword('haslo_ktorym_zaszyfrowano_klucz');
 ```
 
 ### Format kluczy
@@ -247,6 +259,20 @@ Klucze muszą być w formacie PEM:
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 -----END PUBLIC KEY-----
 ```
+
+### Hasło do klucza prywatnego
+
+**Uwaga**: Hasło (`setPrivateKeyPassword`) jest potrzebne **TYLKO** gdy klucz prywatny został wygenerowany z hasłem ochronnym.
+
+```bash
+# Klucz BEZ hasła (częściej używane przez aplikacje):
+openssl genrsa -out private.pem 2048
+
+# Klucz Z hasłem (rzadziej):  
+openssl genrsa -aes256 -out private.pem 2048
+```
+
+Jeśli twój klucz nie ma hasła, **nie ustawiaj** `setPrivateKeyPassword`.
 
 ## 🌐 Endpointy API
 
@@ -327,13 +353,6 @@ vendor/bin/phpunit
 vendor/bin/phpstan analyse
 ```
 
-### Przykład testowy
-
-```php
-// app.php - pełny przykład testowy
-php app.php
-```
-
 ## ⚠️ Wymagania
 
 - **PHP**: 8.0+
@@ -382,179 +401,10 @@ php app.php
 ## 📞 Wsparcie
 
 W przypadku problemów technicznych skontaktuj się z:
-- **TBI Integration Team**: integration@tbibank.ro
 - **GitHub Issues**: [sylapi/omnipay-tbibank/issues](https://github.com/sylapi/omnipay-tbibank/issues)
 
 ---
 
 ## Licencja
 
-MIT License. Zobacz [LICENSE](LICENSE) aby uzyskać więcej informacji.```
-    
-    // Opcje kredytu
-    'instalments' => '24',
-    
-    // Produkty
-    'items' => [
-        [
-            'name' => 'Smartwatch GPS',
-            'qty' => '1.0000',
-            'price' => 1600,
-            'category' => '2',
-            'sku' => 'WATCH001',
-            'ImageLink' => 'https://shop.com/watch.jpg'
-        ]
-    ]
-])->send();
-
-if ($response->isSuccessful()) {
-    if ($response->isRedirect()) {
-        // Przekierowanie do TBI dla dalszego przetwarzania
-        $response->redirect();
-    }
-    echo "Aplikacja kredytowa wysłana pomyślnie";
-}
-```
-
-## Obsługa callback'ów (ReturnToProvider)
-
-TBI wysyła callback'i ze statusem aplikacji:
-
-```php
-// W kontrollerze callback'a
-$response = $gateway->completePurchase([
-    'privateKeyPath' => '/path/to/private.key',
-    'privateKeyPassword' => 'password' // jeśli wymagane
-])->send();
-
-if ($response->isSuccessful()) {
-    // Kredyt zatwierdzony (status_id = 1)
-    $orderId = $response->getTransactionId();
-    echo "Kredyt zatwierdzony dla zamówienia: $orderId";
-    
-} elseif ($response->isCancelled()) {
-    // Kredyt odrzucony/anulowany (status_id = 0)
-    $orderId = $response->getTransactionId();
-    $reason = $response->getRejectionReason();
-    echo "Kredyt odrzucony dla $orderId: $reason";
-}
-```
-
-## Anulowanie zamówienia (CanceledByCustomer)
-
-Merchant może anulować zamówienie przed zatwierdzeniem:
-
-```php
-$response = $gateway->void([
-    'transactionReference' => 'order#12345'
-])->send();
-
-if ($response->isSuccessful()) {
-    echo "Zamówienie anulowane pomyślnie";
-} else {
-    echo "Błąd anulowania: " . $response->getMessage();
-}
-```
-
-## Struktura danych
-
-### Wymagane parametry aplikacji kredytowej
-
-| Parametr | Typ | Opis |
-|----------|-----|------|
-| amount | string | Kwota zamówienia |
-| transactionReference | string | Unikalny ID zamówienia |
-| customerFirstName | string | Imię klienta |
-| customerLastName | string | Nazwisko klienta |
-| customerEmail | string | Email klienta |
-| customerPhone | string | Telefon klienta |
-| billingAddress | string | Adres rozliczeniowy |
-| billingCity | string | Miasto rozliczeniowe |
-| billingCounty | string | Województwo |
-| instalments | string | Liczba rat (domyślnie 12) |
-| items | array | Produkty w koszyku |
-
-### Format produktów
-
-```php
-'items' => [
-    [
-        'name' => 'Nazwa produktu',
-        'qty' => '1.0000', 
-        'price' => 100.00,
-        'category' => '1',     // Kategoria numeryczna
-        'sku' => 'PROD001',
-        'ImageLink' => 'https://...'
-    ]
-]
-```
-
-## Szyfrowanie
-
-TBI wymaga szyfrowania RSA z podziałem na bloki:
-
-1. **Klucz publiczny** - do szyfrowania żądań (plik `.pem`)
-2. **Klucz prywatny** - do odszyfrowywania callback'ów (plik `.pem/.pfx`)
-
-Klucze otrzymujesz od TBI Integration Team.
-
-## Callback'i
-
-TBI wysyła callback'i na `notifyUrl` z danymi:
-
-```json
-{
-  "order_id": "145003523",
-  "status_id": "1",        // 0=odrzucony, 1=zatwierdzony  
-  "motiv": "Powód odrzucenia (jeśli status_id=0)"
-}
-```
-
-## API Endpoints
-
-| Environment | URL |
-|-------------|-----|
-| **Live** | `https://ecommerce.tbibank.ro/Api/LoanApplication` |
-
-### Dostępne metody:
-
-- `/Finalize` - Wysłanie aplikacji kredytowej
-- `/CanceledByCustomer` - Anulowanie przez klienta
-
-## Limitacje
-
-❌ **Niedostępne funkcje:**
-- `fetchTransaction()` - TBI nie oferuje API do sprawdzania statusu
-- `refund()` - Zwroty wymagają kontaktu z TBI support
-
-ℹ️ Status transakcji otrzymujesz wyłącznie przez callback'i.
-
-## Komendy
-
-| COMMAND | DESCRIPTION |
-| ------ | ------ |
-| `composer tests` | Testy jednostkowe |
-| `composer phpstan` | Analiza statyczna PHPStan |
-
-## Wsparcie
-
-Dla wsparcia integracji skontaktuj się z **TBI Integration Team**.
-
----
-
-## Struktura plików
-
-```
-src/
-├── Gateway.php                 # Główna klasa bramy
-├── Message/
-│   ├── PurchaseRequest.php     # Wysyłanie aplikacji kredytowej  
-│   ├── PurchaseResponse.php    # Odpowiedź z TBI
-│   ├── CompletePurchaseRequest.php   # Obsługa callback'ów
-│   ├── CompletePurchaseResponse.php  # Przetwarzanie statusu
-│   ├── VoidRequest.php         # Anulowanie zamówienia
-│   └── VoidResponse.php        # Odpowiedź anulowania
-└── Trait/
-    ├── Request.php             # Wspólne metody żądań + szyfrowanie
-    └── Response.php            # Wspólne metody odpowiedzi
-```
+MIT License. Zobacz [LICENSE](LICENSE) aby uzyskać więcej informacji.
