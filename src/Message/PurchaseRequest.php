@@ -68,8 +68,7 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
             }
             
             if ($response === null && json_last_error() !== JSON_ERROR_NONE) {
-                echo "❌ JSON Parse Error: " . json_last_error_msg() . "\n";
-                $response = ['error' => 'Invalid JSON response from TBI API', 'raw_response' => substr($rawBody, 0, 500)];
+                throw new Exception('JSON Parse Error: ' . json_last_error_msg() . '. Raw response: ' . substr($rawBody, 0, 500));
             }
             
             return new PurchaseResponse($this, $response);
