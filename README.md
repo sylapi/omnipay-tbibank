@@ -120,7 +120,7 @@ $response = $gateway->purchase([
     'customerFirstName' => 'Catalin',
     'customerLastName' => 'Test',
     'customerEmail' => 'test@example.com',
-    'phone' => '0700000000',
+    'customerPhone' => '0700000000',
     'customerCnp' => '',  // CNP może być pusty w testach
     
     // Adres rozliczeniowy
@@ -164,7 +164,7 @@ if ($response->isSuccessful()) {
 | `customerFirstName` | string | Imię klienta |
 | `customerLastName` | string | Nazwisko klienta |
 | `customerEmail` | string | Email klienta |
-| `phone` | string | Telefon klienta |
+| `customerPhone` | string | Telefon klienta |
 | `notifyUrl` | string | URL callback'a |
 
 ### Opcjonalne parametry

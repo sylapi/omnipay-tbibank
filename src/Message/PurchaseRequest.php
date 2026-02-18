@@ -93,7 +93,7 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
             'lname' => $this->getParameter('customerLastName') ?? '',
             'cnp' => $this->getParameter('customerCnp') ?? '',
             'email' => $this->getParameter('customerEmail') ?? '',
-            'phone' => $this->getParameter('phone') ?: '',
+            'phone' => $this->getParameter('customerPhone') ?: '',
             'billing_address' => $this->getParameter('billingAddress') ?: '',
             'billing_city' => $this->getParameter('billingCity') ?: '',
             'billing_county' => $this->getParameter('billingCounty') ?: '',
@@ -140,14 +140,14 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
         return $this->setParameter('customerEmail', $value);
     }
 
-    public function setPhone($value)
+    public function setCustomerPhone($value)
     {
-        return $this->setParameter('phone', $value);
+        return $this->setParameter('customerPhone', $value);
     }
 
-    public function getPhone()
+    public function getCustomerPhone()
     {
-        return $this->getParameter('phone');
+        return $this->getParameter('customerPhone');
     }
 
     public function setCustomerCnp($value)
