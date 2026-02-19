@@ -75,10 +75,24 @@ trait Request {
         $this->setParameter('apiUrl', $apiUrl);
     }
 
+    public function getTestMode()
+    {
+        return $this->getParameter('testMode');
+    }
+
+    public function setTestMode($value)
+    {
+        return $this->setParameter('testMode', $value);
+    }
+
     public function getHeaders(array $append = [])
     {
         $headers = [
             'Content-Type' => 'application/x-www-form-urlencoded',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'User-Agent' => 'TBIBank-OmniPay/1.0',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'close'
         ];
 
         return array_merge($headers, $append);
