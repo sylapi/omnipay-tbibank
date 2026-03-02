@@ -26,7 +26,7 @@ class CompletePurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
         if ($httpRequest->getMethod() === 'POST') {
             $body = $httpRequest->getContent();
             $data = json_decode($body, true);
-            
+
             if (json_last_error() === JSON_ERROR_NONE && $data) {
                 return $data;
             }

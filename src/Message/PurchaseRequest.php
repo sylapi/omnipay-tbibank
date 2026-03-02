@@ -50,9 +50,8 @@ class PurchaseRequest extends \Omnipay\Common\Message\AbstractRequest
 
             // Check for successful redirect response
             $rawBody = $result->getBody();
+
             $statusCode = $result->getStatusCode();
-            
-            $response = json_decode($rawBody, true);
             
             // Handle successful redirect (301/302) as success
             if ($statusCode >= 300 && $statusCode < 400) {
